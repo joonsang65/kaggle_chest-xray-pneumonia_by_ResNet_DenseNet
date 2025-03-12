@@ -20,7 +20,6 @@ train_loader, val_loader, test_loader = return_dataloader(dataset)
 model = ResNet_full_gray().cuda()
 optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
-
 for i in range(epochs):
     train_model(model, train_loader, val_loader, criterion, optimizer)
 
@@ -58,3 +57,4 @@ visualize(model, test_loader, criterion, optimizer)
 #     train_model(model, train_loader, val_loader, criterion, optimizer)
 
 # visualize(model, test_loader, criterion, optimizer)
+criterion, optimizer)
