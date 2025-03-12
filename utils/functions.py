@@ -8,7 +8,7 @@ import seaborn as sns
 from data.make_data import *
 from models.model import *
 
-def test_model(model, dataloader):   # confusion matrix 계산을 위해 함수 분리
+def test_model(model, dataloader):   # Separate function for confusion matrix calculation
     model.eval()
     correct = 0
     total = 0
@@ -22,12 +22,12 @@ def test_model(model, dataloader):   # confusion matrix 계산을 위해 함수 
             _, predicted = torch.max(outputs, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-            hit += torch.sum((predicted == labels) & (labels == 1)).item()  # 적중
-            miss += torch.sum((predicted != labels) & (labels == 1)).item()  # 탈루
-            FA += torch.sum((predicted != labels) & (labels == 0)).item()  # 오경보
-            CR += torch.sum((predicted == labels) & (labels == 0)).item()  # 정기각
+            hit += torch.sum((predicted == labels) & (labels == 1)).item()  # Hit
+            miss += torch.sum((predicted != labels) & (labels == 1)).item()  # Miss
+            FA += torch.sum((predicted != labels) & (labels == 0)).item()  # False Alarm
+            CR += torch.sum((predicted == labels) & (labels == 0)).item()  # Correct Rejection
     print(f"test Accuracy: {100 * correct / total:.2f}%")
-    return hit, FA, miss, CR  # 계산한 값 return
+    return hit, FA, miss, CR  # Return calculated values
 
 
 def validate_model(model, dataloader):
@@ -77,28 +77,27 @@ def train_model(model, train_loader, val_loader, criterion, optimizer):
 
     val_accuracy = validate_model(model, val_loader)
     print(f"Validation Accuracy: {val_accuracy:.2f}%")
-    
 
 
 def return_dataloader(datas_class):
 
-    # 현재 스크립트가 있는 디렉토리 기준으로 상대 경로 설정 / 필요 시 수정
-    BASE_DIR =os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    # Set relative path based on the directory of the current script / Modify if necessary
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     BASE_DIR = os.path.join(BASE_DIR, "chest_xray")
-    
+
     DATA_DIR = os.path.join(BASE_DIR, "chest_xray")
 
-    # 데이터셋 경로 설정 (상대 경로) / 필요 시 수정
+    # Set dataset paths (relative paths) / Modify if necessary
     train_path = os.path.join(DATA_DIR, "train")
     val_path = os.path.join(DATA_DIR, "val")
     test_path = os.path.join(DATA_DIR, "test")
 
-    # 데이터셋 생성
+    # Create datasets
     train_dataset = datas_class(train_path)
     val_dataset = datas_class(val_path)
     test_dataset = datas_class(test_path)
 
-    # DataLoader 설정
+    # Configure DataLoader
     train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=16, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
@@ -108,7 +107,6 @@ def return_dataloader(datas_class):
     print(f"Test Path: {test_path}")
 
     return train_loader, val_loader, test_loader
-
 
 
 def visualize(model, loader, criterion, optimizer):
@@ -122,7 +120,6 @@ def visualize(model, loader, criterion, optimizer):
     print(f'recall : {recall:-2f}')
     print(f'f1_score : {f1_score:-2f}\n')
 
-
     conf_matrix = np.array([[hit, FA],
                             [miss, CR]])
 
@@ -135,8 +132,7 @@ def visualize(model, loader, criterion, optimizer):
     plt.show()
 
 
-
-# 반복 최소화를 위한 함수
+# Function to minimize repetitive input
 def get_input(prompt, options):
     while True:
         value = input(prompt)
@@ -146,7 +142,7 @@ def get_input(prompt, options):
         print(f"Please enter one of {options}")
 
 
-# main.py에서 모델 및 데이터 정의를 위한 함수
+# Function to define model and dataset for main.py
 def define_model():
     ans = 'n'
     while ans != 'y':
@@ -154,16 +150,16 @@ def define_model():
         tuning = get_input("Do you want to fine-tune the model? (Full/partial): ", ['Full', 'partial'])
         model_type = get_input("Which model do you want to use? (ResNet/DenseNet): ", ['ResNet', 'DenseNet'])
 
-        # crop='y'이면 Grayscale을 사용하지 않음
+        # If crop='y', do not use Grayscale
         Grayscale = None if crop == 'y' else get_input("Do you want to convert the images to grayscale? (y/n): ", ['y', 'n'])
 
-        # 데이터 함수 매핑
+        # Data function mapping
         data_funcs = {
             'y': make_crop_datas,
             'n': {'y': make_gray_datas, 'n': make_RGB_datas}
         }
 
-        # 모델 함수 매핑
+        # Model function mapping
         model_funcs = {
             'y': {
                 'Full': {'ResNet': ResNet_full_crop, 'DenseNet': DenseNet_full_crop},
@@ -181,10 +177,10 @@ def define_model():
             }
         }
 
-        # 데이터 처리 선택 (crop 여부에 따라 다르게 접근)
+        # Select data processing function (access differently based on crop choice)
         datas = data_funcs[crop] if crop == 'y' else data_funcs['n'][Grayscale]
 
-        # 모델 선택 (crop='y'일 때는 Grayscale이 없음)
+        # Select model (if crop='y', Grayscale is not applicable)
         if crop == 'y':
             model = model_funcs['y'][tuning][model_type]()
         else:
@@ -203,4 +199,3 @@ def define_model():
                 break
 
     return datas, model
-
