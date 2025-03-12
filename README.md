@@ -92,5 +92,5 @@ Class Activation Mapping (CAM): Visualize the regions the model is focusing on i
 
 ---
 
-You can view the example results at the following link:
+You can view the example results at the following link:  
 https://www.kaggle.com/code/jsjs0125/pneumonia-chest-x-ray-images-by-pytorch
