@@ -5,6 +5,8 @@ from torch.utils.data import DataLoader
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from data.make_data import *
+from models.model import *
 
 def test_model(model, dataloader):   # confusion matrix 계산을 위해 함수 분리
     model.eval()
@@ -131,3 +133,74 @@ def visualize(model, loader, criterion, optimizer):
 
     plt.title('Confusion Matrix')
     plt.show()
+
+
+
+# 반복 최소화를 위한 함수
+def get_input(prompt, options):
+    while True:
+        value = input(prompt)
+        if value in options:
+            return value
+        print("===================================================")
+        print(f"Please enter one of {options}")
+
+
+# main.py에서 모델 및 데이터 정의를 위한 함수
+def define_model():
+    ans = 'n'
+    while ans != 'y':
+        crop = get_input("Crop model has only RGB images.\nDo you want to crop the images? (y/n): ", ['y', 'n'])
+        tuning = get_input("Do you want to fine-tune the model? (Full/partial): ", ['Full', 'partial'])
+        model_type = get_input("Which model do you want to use? (ResNet/DenseNet): ", ['ResNet', 'DenseNet'])
+
+        # crop='y'이면 Grayscale을 사용하지 않음
+        Grayscale = None if crop == 'y' else get_input("Do you want to convert the images to grayscale? (y/n): ", ['y', 'n'])
+
+        # 데이터 함수 매핑
+        data_funcs = {
+            'y': make_crop_datas,
+            'n': {'y': make_gray_datas, 'n': make_RGB_datas}
+        }
+
+        # 모델 함수 매핑
+        model_funcs = {
+            'y': {
+                'Full': {'ResNet': ResNet_full_crop, 'DenseNet': DenseNet_full_crop},
+                'partial': {'ResNet': ResNet_partial_crop, 'DenseNet': DenseNet_partial_crop}
+            },
+            'n': {
+                'y': {
+                    'Full': {'ResNet': ResNet_full_gray, 'DenseNet': DenseNet_full_gray},
+                    'partial': {'ResNet': ResNet_partial_gray, 'DenseNet': DenseNet_partial_gray}
+                },
+                'n': {
+                    'Full': {'ResNet': ResNet_full_RGB, 'DenseNet': DenseNet_full_RGB},
+                    'partial': {'ResNet': ResNet_partial_RGB, 'DenseNet': DenseNet_partial_RGB}
+                }
+            }
+        }
+
+        # 데이터 처리 선택 (crop 여부에 따라 다르게 접근)
+        datas = data_funcs[crop] if crop == 'y' else data_funcs['n'][Grayscale]
+
+        # 모델 선택 (crop='y'일 때는 Grayscale이 없음)
+        if crop == 'y':
+            model = model_funcs['y'][tuning][model_type]()
+        else:
+            model = model_funcs['n'][Grayscale][tuning][model_type]()
+
+        print(f"You selected\nModel: {model_type}\nTuning: {tuning}\nCrop: {crop}\nGrayscale: {Grayscale}")
+        while True:
+            ans = input("\n Is it right? (y/n): ")
+            if ans not in ['y', 'n']:
+                print("Please enter 'y' or 'n'")
+            elif ans == 'n':
+                print("===================================================")
+                print("Please re-enter the information")
+                continue
+            else:
+                break
+
+    return datas, model
+
