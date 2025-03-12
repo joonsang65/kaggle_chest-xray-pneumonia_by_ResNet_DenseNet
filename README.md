@@ -19,10 +19,10 @@
 
 ---
 
-**Key Differences** Between ResNet and DenseNet
-1. Structural Difference: ResNet uses residual connections, whereas DenseNet connects every layer to all previous layers.
-2. Parameter Count: ResNet performs well with relatively fewer parameters, while DenseNet requires significantly more parameters and computational resources.
-3. Learning Efficiency: ResNet excels with large datasets, while DenseNet is particularly strong with smaller datasets.
+Key Differences Between ResNet and DenseNet
+1. **Structural Difference**: ResNet uses residual connections, whereas DenseNet connects every layer to all previous layers.
+2. **Parameter Count**: ResNet performs well with relatively fewer parameters, while DenseNet requires significantly more parameters and computational resources.
+3. **Learning Efficiency**: ResNet excels with large datasets, while DenseNet is particularly strong with smaller datasets.
 
 ---
 
