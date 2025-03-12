@@ -188,7 +188,7 @@ def define_model():
 
         print(f"You selected\nModel: {model_type}\nTuning: {tuning}\nCrop: {crop}\nGrayscale: {Grayscale}")
         while True:
-            ans = input("\n Is it right? (y/n): ")
+            ans = input("\n Are these choices correct? (y/n): ")
             if ans not in ['y', 'n']:
                 print("Please enter 'y' or 'n'")
             elif ans == 'n':
